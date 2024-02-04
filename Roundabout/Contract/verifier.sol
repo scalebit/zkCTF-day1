@@ -20,6 +20,27 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+contract Roundabout{
+    bool flag = false;
+
+    Groth16Verifier public verifier;
+
+    constructor() {
+        verifier= new Groth16Verifier();
+    }
+
+    function verify(uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[1] calldata _pubSignals) external  returns(bool) {
+
+        flag = verifier.verifyProof(_pA, _pB,_pC,_pubSignals);
+        return flag;
+    }
+
+    function isSolved()external view  returns (bool){
+        return flag;
+    }
+
+}
+
 contract Groth16Verifier {
     // Scalar field size
     uint256 constant r    = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
@@ -42,14 +63,14 @@ contract Groth16Verifier {
     uint256 constant deltay1 = 363574526751910392811347335952729501875319026382322946447817665177326094816;
     uint256 constant deltay2 = 17198675488733232971841890931572977045377778709292301764093990711105796986493;
 
-    
+
     uint256 constant IC0x = 13419792952126840478673638963141122302587014622622604932857287263326639616934;
     uint256 constant IC0y = 19551168072322013827838902144881159056853371311431373500839405163352846399976;
-    
+
     uint256 constant IC1x = 20307339771029451491474674032727372515507048888836318967504414849042064633937;
     uint256 constant IC1y = 9401931764668861050170218745300289496263152524845401471688659460238598401815;
-    
- 
+
+
     // Memory data
     uint16 constant pVk = 0;
     uint16 constant pPairing = 128;
@@ -64,7 +85,7 @@ contract Groth16Verifier {
                     return(0, 0x20)
                 }
             }
-            
+
             // G1 function to multiply a G1 value(x,y) to value in an address
             function g1_mulAccC(pR, x, y, s) {
                 let success
@@ -99,9 +120,9 @@ contract Groth16Verifier {
                 mstore(add(_pVk, 32), IC0y)
 
                 // Compute the linear combination vk_x
-                
+
                 g1_mulAccC(_pVk, IC1x, IC1y, calldataload(add(pubSignals, 0)))
-                
+
 
                 // -A
                 mstore(_pPairing, calldataload(pA))
@@ -153,12 +174,12 @@ contract Groth16Verifier {
             let pMem := mload(0x40)
             mstore(0x40, add(pMem, pLastMem))
 
-            // Validate that all evaluations ∈ F
-            
+            // Validate that all evaluations 鈭?F
+
             checkField(calldataload(add(_pubSignals, 0)))
-            
+
             checkField(calldataload(add(_pubSignals, 32)))
-            
+
 
             // Validate all evaluations
             let isValid := checkPairing(_pA, _pB, _pC, _pubSignals, pMem)

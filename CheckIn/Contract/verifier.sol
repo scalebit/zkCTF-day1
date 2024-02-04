@@ -20,6 +20,27 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+contract Checkin{
+    bool flag = false;
+
+    Groth16Verifier public verifier;
+
+    constructor() {
+        verifier= new Groth16Verifier();
+    }
+
+    function verify(uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[1] calldata _pubSignals) external  returns(bool) {
+
+        flag = verifier.verifyProof(_pA, _pB,_pC,_pubSignals);
+        return flag;
+    }
+
+    function isSolved()external view  returns (bool){
+        return flag;
+    }
+
+}
+
 contract Groth16Verifier {
     // Scalar field size
     uint256 constant r    = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
